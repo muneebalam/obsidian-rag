@@ -1,0 +1,14 @@
+[project]
+name = "obsidian-rag"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "huggingface>=0.0.1",
+    "python-dotenv>=1.1.1",
+    "sentence-transformers>=5.0.0",
+    "streamlit>=1.46.1",
+    "torch>=2.7.1",
+    "transformers>=4.53.1",
+]
