@@ -20,3 +20,5 @@ How it works (high level):
 - Retrieval techniques: 
 - Agentic chatbot (including agentic workflows - logical and semantic routing, query structuring)
 - Observability
+- Fine tuning
+- RLHF
