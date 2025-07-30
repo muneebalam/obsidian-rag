@@ -1,7 +1,9 @@
 import streamlit as st
 from src.app import MODELS_CONFIG, load_model_and_tokenizer
+from src.utils import EMBEDDING_MODELS, process_obsidian_files, embed_documents, save_vector_db, load_vector_db
 import torch
 import gc
+import os
 
 def sidebar_page():
     """Sidebar configuration and model management"""
@@ -75,6 +77,71 @@ def sidebar_page():
         if st.sidebar.button("🗑️ Clear Chat History"):
             st.session_state.messages = []
             st.rerun()
+
+        # Embedding section
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("🔍 Vector Database")
+        
+        # Embedding model selection
+        selected_embedding_model = st.sidebar.selectbox(
+            "Embedding Model:",
+            list(EMBEDDING_MODELS.keys()),
+            index=0,
+            help="Select an embedding model for vector database creation"
+        )
+        
+        # Show embedding model info
+        embedding_info = EMBEDDING_MODELS[selected_embedding_model]
+        st.sidebar.info(f"**Model:** {selected_embedding_model}\n\n**Dimensions:** {embedding_info['dimensions']}\n\n**Description:** {embedding_info['description']}")
+        
+        # Chunking parameters
+        st.sidebar.subheader("📄 Chunking Settings")
+        chunk_size = st.sidebar.slider("Chunk Size", 500, 2000, 1000, 100, help="Size of text chunks in characters")
+        overlap = st.sidebar.slider("Overlap", 50, 500, 200, 50, help="Overlap between chunks in characters")
+        
+        # Embed database button
+        if st.sidebar.button("🚀 Embed Obsidian Database", type="primary"):
+            if obsidian_path and os.path.exists(obsidian_path):
+                try:
+                    with st.spinner("Processing Obsidian files..."):
+                        # Process files
+                        documents = process_obsidian_files(obsidian_path, chunk_size, overlap)
+                        
+                        if documents:
+                            st.sidebar.success(f"✅ Processed {len(documents)} document chunks")
+                            
+                            # Embed documents
+                            with st.spinner("Creating embeddings..."):
+                                vector_db = embed_documents(documents, selected_embedding_model)
+                                
+                                # Save vector database
+                                if save_vector_db(vector_db):
+                                    st.session_state.vector_db = vector_db
+                                    st.sidebar.success("✅ Vector database created and saved!")
+                                else:
+                                    st.sidebar.error("❌ Failed to save vector database")
+                        else:
+                            st.sidebar.warning("⚠️ No documents found to process")
+                            
+                except Exception as e:
+                    st.sidebar.error(f"❌ Error embedding database: {str(e)}")
+            else:
+                st.sidebar.error("❌ Please enter a valid Obsidian directory path")
+        
+        # Load existing vector database
+        if st.sidebar.button("📂 Load Existing Database"):
+            vector_db = load_vector_db()
+            if vector_db:
+                st.session_state.vector_db = vector_db
+                st.sidebar.success(f"✅ Loaded vector database with {vector_db['total_documents']} documents")
+            else:
+                st.sidebar.warning("⚠️ No existing vector database found")
+        
+        # Show vector database info
+        if hasattr(st.session_state, 'vector_db') and st.session_state.vector_db:
+            db_info = st.session_state.vector_db
+            st.sidebar.subheader("📊 Database Info")
+            st.sidebar.info(f"**Documents:** {db_info['total_documents']}\n\n**Model:** {db_info['model_name']}\n\n**Created:** {db_info['created_at'][:10]}")
 
         # Page selection
         st.sidebar.markdown("---")
