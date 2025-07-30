@@ -36,6 +36,31 @@ EMBEDDING_MODELS = {
         "model_name": "BAAI/bge-base-en-v1.5", 
         "dimensions": 768,
         "description": "BGE base model, high quality"
+    },
+    "roberta-base": {
+        "model_name": "sentence-transformers/roberta-base",
+        "dimensions": 768,
+        "description": "RoBERTa base model, good general embeddings"
+    },
+    "roberta-large": {
+        "model_name": "sentence-transformers/roberta-large",
+        "dimensions": 1024,
+        "description": "RoBERTa large model, high quality embeddings"
+    },
+    "all-roberta-large-v1": {
+        "model_name": "sentence-transformers/all-roberta-large-v1",
+        "dimensions": 1024,
+        "description": "Fine-tuned RoBERTa large for sentence embeddings"
+    },
+    "paraphrase-multilingual-roberta-base-v2": {
+        "model_name": "sentence-transformers/paraphrase-multilingual-roberta-base-v2",
+        "dimensions": 768,
+        "description": "Multilingual RoBERTa for multiple languages"
+    },
+    "roberta-base-nli-stsb-mean-tokens": {
+        "model_name": "sentence-transformers/roberta-base-nli-stsb-mean-tokens",
+        "dimensions": 768,
+        "description": "RoBERTa fine-tuned on NLI and STS-B tasks"
     }
 }
 

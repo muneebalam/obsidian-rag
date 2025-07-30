@@ -22,7 +22,6 @@ How it works (high level):
 
 # To do
 
-- Configurable embedding model and LLM reasoning model
 - Querying techniques: step back, multi query, drill down
 - Indexing techniques: multi-representation indexing, different chunking techniques, RAPTOR, ColBERT, knowledge graph
 - Retrieval techniques: 

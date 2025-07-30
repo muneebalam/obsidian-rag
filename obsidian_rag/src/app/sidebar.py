@@ -1,6 +1,7 @@
 import streamlit as st
-from src.app import MODELS_CONFIG, load_model_and_tokenizer
-from src.utils import EMBEDDING_MODELS, process_obsidian_files, embed_documents, save_vector_db, load_vector_db
+from src.utils import MODELS_CONFIG
+from src.app.model_settings import load_model_and_tokenizer, get_available_models, validate_model_access
+from src.utils import EMBEDDING_MODELS, process_obsidian_files, embed_documents, save_vector_db, load_vector_db, load_config
 import torch
 import gc
 import os
@@ -8,6 +9,9 @@ import os
 def sidebar_page():
     """Sidebar configuration and model management"""
     try:
+        # Load configuration
+        config = load_config()
+        
         # Sidebar for model selection
         st.sidebar.title("🤖 Settings")
 
@@ -21,62 +25,111 @@ def sidebar_page():
 
         st.sidebar.subheader("🤖 Chat Model")
 
+        # Get available models based on API key availability
+        available_models = get_available_models(config)
+        
+        if not available_models:
+            st.sidebar.error("❌ No models available. Please check your API keys or internet connection.")
+            return "💬 Chat", None, None
+
         # Model selection dropdown
         selected_model_name = st.sidebar.selectbox(
             "Choose a Model:",
-            list(MODELS_CONFIG.keys()),
+            available_models,
             index=0
         )
 
         # Get selected model config
         selected_config = MODELS_CONFIG[selected_model_name].copy()
 
+        # Show model type and status
+        model_type = selected_config.get("type", "local")
+        if model_type == "api":
+            provider = selected_config.get("provider", "unknown")
+            api_key = config.get("api_keys", {}).get(provider, "")
+            if api_key:
+                st.sidebar.success(f"✅ {provider.upper()} API key available")
+            else:
+                st.sidebar.error(f"❌ No {provider.upper()} API key found")
+        else:
+            st.sidebar.info("🏠 Local model")
+
         # Model parameters
         st.sidebar.subheader("Generation Parameters")
-        temperature = st.sidebar.slider("Temperature", 0.1, 1.0, selected_config["temperature"], 0.1)
-        max_length = st.sidebar.slider("Max Length", 50, 200, selected_config["max_length"], 10)
-
-        # Update config with sidebar values
-        selected_config["temperature"] = temperature
-        selected_config["max_length"] = max_length
-
-        # Load model if changed
-        if (st.session_state.current_model != selected_config["model_name"] or 
-            st.session_state.tokenizer is None or 
-            st.session_state.model is None):
+        
+        if model_type == "api":
+            # API model parameters
+            temperature = st.sidebar.slider("Temperature", 0.1, 1.0, selected_config["temperature"], 0.1)
+            max_tokens = st.sidebar.slider("Max Tokens", 100, 4000, selected_config["max_tokens"], 100)
             
-            with st.spinner(f"Loading {selected_model_name}..."):
-                try:
-                    # Clear previous model from memory
-                    if st.session_state.model is not None:
-                        del st.session_state.model
-                        del st.session_state.tokenizer
-                        gc.collect()
-                        if torch.cuda.is_available():
-                            torch.cuda.empty_cache()
-                    
-                    # Load new model
-                    tokenizer, model = load_model_and_tokenizer(selected_config["model_name"])
-                    
-                    if tokenizer is not None and model is not None:
-                        st.session_state.tokenizer = tokenizer
-                        st.session_state.model = model
-                        st.session_state.current_model = selected_config["model_name"]
-                        st.sidebar.success(f"✅ {selected_model_name} loaded successfully!")
-                    else:
-                        st.sidebar.error(f"❌ Failed to load {selected_model_name}")
-                except Exception as e:
-                    st.sidebar.error(f"❌ Error loading model: {str(e)}")
+            # Update config with sidebar values
+            selected_config["temperature"] = temperature
+            selected_config["max_tokens"] = max_tokens
+        else:
+            # Local model parameters
+            temperature = st.sidebar.slider("Temperature", 0.1, 1.0, selected_config["temperature"], 0.1)
+            max_length = st.sidebar.slider("Max Length", 50, 200, selected_config["max_length"], 10)
+            
+            # Update config with sidebar values
+            selected_config["temperature"] = temperature
+            selected_config["max_length"] = max_length
+
+        # Load model if changed (only for local models)
+        if model_type == "local":
+            if (st.session_state.current_model != selected_config["model_name"] or 
+                st.session_state.tokenizer is None or 
+                st.session_state.model is None):
+                
+                with st.spinner(f"Loading {selected_model_name}..."):
+                    try:
+                        # Clear previous model from memory
+                        if st.session_state.model is not None:
+                            del st.session_state.model
+                            del st.session_state.tokenizer
+                            gc.collect()
+                            if torch.cuda.is_available():
+                                torch.cuda.empty_cache()
+                        
+                        # Load new model
+                        tokenizer, model = load_model_and_tokenizer(selected_config["model_name"])
+                        
+                        if tokenizer is not None and model is not None:
+                            st.session_state.tokenizer = tokenizer
+                            st.session_state.model = model
+                            st.session_state.current_model = selected_config["model_name"]
+                            st.sidebar.success(f"✅ {selected_model_name} loaded successfully!")
+                        else:
+                            st.sidebar.error(f"❌ Failed to load {selected_model_name}")
+                    except Exception as e:
+                        st.sidebar.error(f"❌ Error loading model: {str(e)}")
 
         # Display model info
-        if st.session_state.current_model:
+        if model_type == "local" and st.session_state.current_model:
             st.sidebar.subheader("Current Model")
             st.sidebar.info(f"**Model:** {selected_model_name}\n\n**Path:** {st.session_state.current_model}")
+        elif model_type == "api":
+            st.sidebar.subheader("API Model")
+            st.sidebar.info(f"**Model:** {selected_model_name}\n\n**Provider:** {selected_config['provider'].upper()}\n\n**Type:** API-based")
 
         # Clear chat button
         if st.sidebar.button("🗑️ Clear Chat History"):
             st.session_state.messages = []
             st.rerun()
+
+        # API Key Status
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("🔑 API Key Status")
+        
+        api_status = {}
+        for provider in ["gemini"]:
+            api_key = config.get("api_keys", {}).get(provider, "")
+            if api_key and api_key.strip():
+                api_status[provider] = "✅ Available"
+            else:
+                api_status[provider] = "❌ Missing"
+        
+        for provider, status in api_status.items():
+            st.sidebar.text(f"{provider.upper()}: {status}")
 
         # Embedding section
         st.sidebar.markdown("---")
