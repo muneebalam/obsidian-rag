@@ -1,0 +1,22 @@
+# Configuration file for Obsidian RAG
+# Environment variables can be used with ${ENV_VAR_NAME} syntax
+
+# API Keys
+api_keys:
+  gemini: ${GEMINI_API_KEY}
+
+# Model Settings
+models:
+  gemini:
+    model_name: "gemini-2.0-flash-lite"
+    max_tokens: 2048
+    temperature: 0.7
+
+# Application Settings
+app:
+  default_chat_model: "GPT-2 (Medium)"
+  default_embedding_model: "all-MiniLM-L6-v2"
+  chunk_size: 1000
+  chunk_overlap: 200
+  max_context_length: 2000
+  top_k_results: 3 

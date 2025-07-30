@@ -18,12 +18,10 @@ How it works (high level):
 
 # Running
 
-1. Run `uv run app.py`
+1. Run `uv run streamlit run app.py`
 
 # To do
 
-- Streamlit interface
-- Configurable embedding model and LLM reasoning model
 - Querying techniques: step back, multi query, drill down
 - Indexing techniques: multi-representation indexing, different chunking techniques, RAPTOR, ColBERT, knowledge graph
 - Retrieval techniques: 
@@ -32,3 +30,4 @@ How it works (high level):
 - Fine tuning
 - RLHF
 - Graph DB
+- Knowledge graph

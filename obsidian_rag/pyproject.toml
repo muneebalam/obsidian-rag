@@ -10,4 +10,9 @@ dependencies = [
     "streamlit>=1.46.1",
     "torch>=2.7.1",
     "transformers>=4.53.1",
+    "accelerate>=0.27.0",
+    "sentence-transformers>=2.5.0",
+    "google-generativeai>=0.8.0",
+    "pyyaml>=6.0.0",
+    "dotenv>=0.9.9",
 ]
