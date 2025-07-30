@@ -16,6 +16,13 @@ AVAILABLE_MODELS = {
     "MiniLM (SQuAD2)": "deepset/minilm-uncased-squad2"
 }
 
+# Querying technique selection
+QUERYING_TECHNIQUES = {
+    "Step Back": "step_back",
+    "Multi Query": "multi_query",
+    "Drill Down": "drill_down"
+}
+
 # Initialize models
 @st.cache_resource
 def load_models():
@@ -134,12 +141,6 @@ selected_model = st.sidebar.selectbox(
     index=0
 )
 
-# Querying technique selection
-QUERYING_TECHNIQUES = {
-    "Step Back": "step_back",
-    "Multi Query": "multi_query",
-    "Drill Down": "drill_down"
-}
 selected_technique = st.sidebar.selectbox(
     "Querying Technique",
     options=list(QUERYING_TECHNIQUES.keys()),

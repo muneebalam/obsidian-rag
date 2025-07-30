@@ -18,7 +18,8 @@ How it works (high level):
 
 # Running
 
-1. Run `uv run app.py`
+1. `cd obsidian_rag`
+2. Run `uv run app.py`
 
 # To do
 

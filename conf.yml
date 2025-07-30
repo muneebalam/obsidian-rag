@@ -1,0 +1,21 @@
+models:
+  qa:
+    "Roberta Base (SQuAD2)": "deepset/roberta-base-squad2",
+    "DistilBERT (SQuAD2)": "deepset/distilbert-base-uncased-distilled-squad",
+    "BERT (SQuAD2)": "bert-large-uncased-whole-word-masking-finetuned-squad",
+    "MiniLM (SQuAD2)": "deepset/minilm-uncased-squad2"
+  embedding:
+    "Roberta Base (SQuAD2)": "deepset/roberta-base-squad2",
+    "DistilBERT (SQuAD2)": "deepset/distilbert-base-uncased-distilled-squad",
+    "BERT (SQuAD2)": "bert-large-uncased-whole-word-masking-finetuned-squad",
+    "MiniLM (SQuAD2)": "deepset/minilm-uncased-squad2"  
+
+rag_options:
+  querying_techniques:
+    - step back
+    - multi query
+    - drill down
+
+api_keys:
+  openai:
+    - 
