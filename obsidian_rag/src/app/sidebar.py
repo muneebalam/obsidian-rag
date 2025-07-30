@@ -5,6 +5,8 @@ from src.utils import EMBEDDING_MODELS, process_obsidian_files, embed_documents,
 import torch
 import gc
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def sidebar_page():
     """Sidebar configuration and model management"""
@@ -46,7 +48,7 @@ def sidebar_page():
         model_type = selected_config.get("type", "local")
         if model_type == "api":
             provider = selected_config.get("provider", "unknown")
-            api_key = config.get("api_keys", {}).get(provider, "")
+            api_key = os.environ[f"{provider.upper()}_API_KEY"] #config.get("api_keys", {}).get(provider, "")]
             if api_key:
                 st.sidebar.success(f"✅ {provider.upper()} API key available")
             else:

@@ -16,7 +16,6 @@ from .config import (
     validate_api_keys
 )
 from .api_chat import (
-    setup_gemini,
     generate_gemini_response,
     generate_api_response
 )
