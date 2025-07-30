@@ -204,7 +204,7 @@ def embed_documents(documents: List[Dict[str, Any]], model_name: str) -> Dict[st
     return vector_db
 
 
-def save_vector_db(vector_db: Dict[str, Any], filepath: str = "vector_db.pkl"):
+def save_vector_db(vector_db: Dict[str, Any], filepath: str = "data/vector_db.pkl"):
     """Save vector database to file"""
     try:
         with open(filepath, 'wb') as f:
@@ -215,7 +215,7 @@ def save_vector_db(vector_db: Dict[str, Any], filepath: str = "vector_db.pkl"):
         return False
 
 
-def load_vector_db(filepath: str = "vector_db.pkl") -> Dict[str, Any]:
+def load_vector_db(filepath: str = "data/vector_db.pkl") -> Dict[str, Any]:
     """Load vector database from file"""
     try:
         with open(filepath, 'rb') as f:
